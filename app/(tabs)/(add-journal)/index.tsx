@@ -113,15 +113,11 @@ export default function JournalEntry(): JSX.Element {
         messages: [{
             role: "user",
             content: `"${response}"
-            Does this journal entry have a positive, negative, or mixed sentiment? Provide your answer with just one of these 3 words and nothing else.`,
+            Does this journal entry have a positive, negative, mixed sentiment, or is it gibberish? Provide your answer with just one of these 4 words and nothing else.`,
         }],
     });
 
     const sentimentString = completion.choices[0].message.content;
-
-    console.log(sentimentString);
-
-
       if (user) {
         await addDoc(collection(FIRESTORE_DB, "journal-responses"), {
           response: response,

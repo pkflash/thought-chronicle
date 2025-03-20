@@ -34,6 +34,7 @@ interface JournalEntry {
   id: string;
   response: string;
   timestamp: Date | null;
+  sentiment: string;
 }
 
 /**
@@ -189,6 +190,7 @@ export default function EntryPage(): JSX.Element {
           id: docSnap.id,
           response: docData.response || "",
           timestamp: docData.timestamp ? docData.timestamp.toDate() : null,
+          sentiment: docData.sentiment ? docData.sentiment : null,
         });
       });
       setJournalEntries(journalEntriesData);
@@ -369,7 +371,13 @@ export default function EntryPage(): JSX.Element {
                   }}
                 >
                   <Image
-                    source={require("../../../assets/images/journal.png")}
+                    source={entry.sentiment ? 
+                      (entry.sentiment === "Positive" ? require("../../../assets/images/Smile.png") 
+                      : entry.sentiment === "Negative" ? require("../../../assets/images/Frown.png")
+                      : entry.sentiment === "Mixed" ? require("../../../assets/images/Neutral Face.png")
+                      : require("../../../assets/images/journal.png"))
+
+                    : require("../../../assets/images/journal.png")}
                     style={styles.entryImage}
                     resizeMode="contain"
                   />
