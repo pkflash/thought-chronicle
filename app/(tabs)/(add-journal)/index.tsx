@@ -15,6 +15,7 @@ import { router } from "expo-router";
 import { FIREBASE_AUTH } from "../../../FirebaseConfig";
 import { FIRESTORE_DB } from "../../../FirebaseConfig";
 import { addDoc, collection } from "firebase/firestore";
+import OpenAI from "openai";
 
 /**
  * Calls the protected prompt function and returns its response.
@@ -64,6 +65,9 @@ export default function JournalEntry(): JSX.Element {
     : 0;
   const currentDate: Date = new Date();
   const maxWords = 1500;
+  const openai = new OpenAI({
+    apiKey: "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",
+  });
 
   /**
    * Navigates back to the home page.
@@ -101,15 +105,34 @@ export default function JournalEntry(): JSX.Element {
     }
     try {
       const user = FIREBASE_AUTH.currentUser; // Get the current user's UID from Firebase Auth
+
+      // Analyze sentiment with call to ChatGPT
+
+    const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{
+            role: "user",
+            content: `"${response}"
+            Does this journal entry have a positive, negative, or mixed sentiment? Provide your answer with just one of these 3 words and nothing else.`,
+        }],
+    });
+
+    const sentimentString = completion.choices[0].message.content;
+
+    console.log(sentimentString);
+
+
       if (user) {
         await addDoc(collection(FIRESTORE_DB, "journal-responses"), {
           response: response,
           date: currentDate.toLocaleDateString(),
           timestamp: new Date(),
           userId: user.uid, // Track the user who submitted the response
+          sentiment: sentimentString,
         });
         router.replace("/(add-journal)/confirmation");
         setResponse(""); // Clear input after submission
+
       } else {
         Alert.alert("You need to be logged in to submit a response.");
       }
